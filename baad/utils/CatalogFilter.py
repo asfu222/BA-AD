@@ -47,7 +47,7 @@ class CatalogFilter:
         
         asset_choices = {
             self._get_name_from_url(asset['url']): asset 
-            for asset in game_files.get('AssetBundles', [])
+            for asset in game_files.get('AndroidAssetBundles', []) + game_files.get('iOSAssetBundles', [])
         }
         
         asset_matches = self._find_matches(pattern, asset_choices)

@@ -22,7 +22,8 @@ class ResourceDownloader:
         self.semaphore = None
         self.catalog_parser = CatalogParser(catalog_url, version)
         self.categories = {
-            'asset': 'AssetBundles',
+            'androidassets': 'AndroidAssetBundles',
+            'iosassets': 'iOSAssetBundles',
             'table': 'TableBundles',
             'media': 'MediaResources',
         }
@@ -131,12 +132,15 @@ class ResourceDownloader:
                 await self._download_category(files, Path(self.output) / category)
 
     async def get_file_size(self, session: ClientSession, url: str) -> int | None:
-        try:
-            async with session.head(url, allow_redirects=True) as response:
-                return int(response.headers.get('Content-Length', 0))
+        for i in range(10):
+            try:
+                async with session.head(url, allow_redirects=True) as response:
+                    return int(response.headers.get('Content-Length', 0))
 
-        except (ClientError, ValueError):
-            return None
+            except (ClientError, ValueError):
+                return None
+            except TimeoutError:
+                continue
 
     def initialize_download(self) -> dict:
         self.fetch_catalog_url()
@@ -160,11 +164,11 @@ class ResourceDownloader:
         
         return filtered_result
 
-    def download(self, assets: bool = True, tables: bool = True, media: bool = True, limit: int | None = 5) -> None:
+    def download(self, androidassets: bool = True, iosassets: bool = True, tables: bool = True, media: bool = True, limit: int | None = 5) -> None:
         game_files = self.initialize_download()
 
         categories = [
-            self.categories[cat] for cat, enabled in [('asset', assets), ('table', tables), ('media', media)] if enabled
+            self.categories[cat] for cat, enabled in [('androidassets', androidassets), ('iosassets', iosassets), ('table', tables), ('media', media)] if enabled
         ]
 
         self.semaphore = asyncio.Semaphore(limit if limit is not None else float('inf'))

@@ -88,9 +88,11 @@ class CatalogParser:
 
         self.console.print('[cyan]Fetching catalogs...[/cyan]')
 
-        bundle_data = self._fetch_data(f'{server_url}/Android/bundleDownloadInfo.json', 'catalogurl')
-        self.save_json(self.cache_dir / 'bundleDownloadInfo.json', bundle_data)
-
+        android_bundle_data = self._fetch_data(f'{server_url}/Android/bundleDownloadInfo.json', 'catalogurl')
+        self.save_json(self.cache_dir / 'bundleDownloadInfo-Android.json', android_bundle_data)
+        ios_bundle_data = self._fetch_data(f'{server_url}/iOS/bundleDownloadInfo.json', 'catalogurl')
+        self.save_json(self.cache_dir / 'bundleDownloadInfo-iOS.json', ios_bundle_data)
+        
         table_data = self._fetch_table_bytes(catalog=server_url)
         table_catalog = CatalogDecrypter.from_bytes(table_data, server_url, media=False)
         table_catalog.to_json(self.cache_dir / 'TableCatalog.json', media=False)
@@ -102,18 +104,27 @@ class CatalogParser:
     def get_game_files(self) -> dict:
         server_url = self.fetch_catalog_url()
 
-        bundle_data = self._load_json(self.cache_dir / 'bundleDownloadInfo.json')
+        android_bundle_data = self._load_json(self.cache_dir / 'bundleDownloadInfo-Android.json')
+        ios_bundle_data = self._load_json(self.cache_dir / 'bundleDownloadInfo-iOS.json')
         table_data = self._load_json(self.cache_dir / 'TableCatalog.json')
         media_data = self._load_json(self.cache_dir / 'MediaCatalog.json')
 
         return {
-            'AssetBundles': [
+            'AndroidAssetBundles': [
                 {
                     'url': f'{server_url}/Android/{asset["Name"]}',
                     'crc': asset.get('Crc', 0),
                     'size': asset.get('Size', 0)
                 }
-                for asset in bundle_data['BundleFiles']
+                for asset in android_bundle_data['BundleFiles']
+            ],
+            'iOSAssetBundles': [
+                {
+                    'url': f'{server_url}/iOS/{asset["Name"]}',
+                    'crc': asset.get('Crc', 0),
+                    'size': asset.get('Size', 0)
+                }
+            for asset in ios_bundle_data['BundleFiles']
             ],
             'TableBundles': [
                 {

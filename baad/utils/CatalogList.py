@@ -52,7 +52,8 @@ class CatalogList:
         cache_dir = self.downloader.catalog_parser.cache_dir
         
         catalog_configs = {
-            'AssetBundles': (cache_dir / 'bundleDownloadInfo.json', 'BundleFiles'),
+            'AndroidAssetBundles': (cache_dir / 'bundleDownloadInfo-Android.json', 'BundleFiles'),
+            'iOSAssetBundles': (cache_dir / 'bundleDownloadInfo-iOS.json', 'BundleFiles'),
             'MediaResources': (cache_dir / 'MediaCatalog.json', 'MediaResources'),
             'TableBundles': (cache_dir / 'TableCatalog.json', 'TableBundles')
         }
@@ -70,7 +71,7 @@ class CatalogList:
         with open(path) as f:
             data = json.load(f)
             
-        if category == 'AssetBundles':
+        if category.endswith('AssetBundles'):
             return self._load_asset_bundles(data, key)
             
         if category == 'MediaResources':

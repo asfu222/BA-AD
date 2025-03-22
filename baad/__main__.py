@@ -88,9 +88,14 @@ def arguments() -> tuple:  # sourcery skip: extract-duplicate-method
         help='filter by name',
     )
     download.add_argument(
-        '--assets',
+        '--androidassets',
         action='store_true',
-        help='download the assetbundles',
+        help='download android assetbundles',
+    )
+    download.add_argument(
+        '--iosassets',
+        action='store_true',
+        help='download ios assetbundles',
     )
     download.add_argument(
         '--tables',
@@ -150,7 +155,7 @@ def arguments() -> tuple:  # sourcery skip: extract-duplicate-method
     if (
         hasattr(args, 'commands')
         and args.commands in ['download', 'extract']
-        and (args.all and (args.assets or args.tables or args.media))
+        and (args.all and (getattr(args, 'assets', 0) or getattr(args, 'iosassets', 0) or getattr(args, 'androidassets', 0) or args.tables or args.media))
     ):
         console = Console(stderr=True)
         console.print(
@@ -162,7 +167,7 @@ def arguments() -> tuple:  # sourcery skip: extract-duplicate-method
         )
         raise SystemExit(1)
 
-    if hasattr(args, 'commands') and args.commands == 'extract' and sum([args.assets, args.tables, args.media]) > 1:
+    if hasattr(args, 'commands') and args.commands == 'extract' and sum([int(getattr(args, 'assets', 0) or getattr(args, 'iosassets', 0) or getattr(args, 'androidassets', 0)), args.tables, args.media]) > 1:
         console = Console(stderr=True)
         console.print(
             Traceback.from_exception(
@@ -193,7 +198,8 @@ def resource_downloader(args) -> ResourceDownloader:
 
         limit = None if args.limit == 0 else args.limit
         downloader.download(
-            assets=args.assets,
+            androidassets=args.androidassets,
+            iosassets=args.iosassets,
             tables=args.tables,
             media=args.media,
             limit=limit,
