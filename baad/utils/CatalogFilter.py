@@ -47,7 +47,7 @@ class CatalogFilter:
         
         asset_choices_android = {
             self._get_name_from_url(asset['url']): asset 
-            for asset in game_files.get('AndroidAssetBundles', []) + game_files.get('iOSAssetBundles', [])
+            for asset in game_files.get('AndroidAssetBundles', [])
         }
         asset_choices_ios = {
             self._get_name_from_url(asset['url']): asset 
