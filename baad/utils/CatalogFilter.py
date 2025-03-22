@@ -45,13 +45,18 @@ class CatalogFilter:
     def filter_files(self, pattern: str) -> dict:
         game_files = self._load_game_files()
         
-        asset_choices = {
+        asset_choices_android = {
             self._get_name_from_url(asset['url']): asset 
             for asset in game_files.get('AndroidAssetBundles', []) + game_files.get('iOSAssetBundles', [])
         }
+        asset_choices_ios = {
+            self._get_name_from_url(asset['url']): asset 
+            for asset in game_files.get('iOSAssetBundles', [])
+        }
         
-        asset_matches = self._find_matches(pattern, asset_choices)
-        asset_results = [
+        asset_matches_android = self._find_matches(pattern, asset_choices_android)
+        asset_matches_ios = self._find_matches(pattern, asset_choices_ios)
+        asset_results_android = [
             {
                 'url': data['url'],
                 'crc': data['crc'],
@@ -59,9 +64,18 @@ class CatalogFilter:
                 'name': name
             }
 
-            for name, data in asset_matches
+            for name, data in asset_matches_android
         ]
+        asset_results_ios = [
+            {
+                'url': data['url'],
+                'crc': data['crc'],
+                'size': data.get('size', 0),
+                'name': name
+            }
 
+            for name, data in asset_matches_ios
+        ]
         table_choices = {
             self._get_name_from_url(table['url']): table
             for table in game_files.get('TableBundles', [])
@@ -96,7 +110,8 @@ class CatalogFilter:
         ]
 
         return {
-            'AssetBundles': asset_results,
+            'AndroidAssetBundles': asset_results_android,
+            'iOSAssetBundles': asset_results_ios,
             'TableBundles': table_results, 
             'MediaResources': media_results
         }
