@@ -37,7 +37,7 @@ class ApkParser:
 
 
     def _get_apk_url(self) -> str:
-        base_url = "https://d.apkpure.com/b"
+        base_url = "https://d.apkpure.net/b"
         app_id = "com.YostarJP.BlueArchive"
         
         if not self.version:
